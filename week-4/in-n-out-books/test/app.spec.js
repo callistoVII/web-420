@@ -8,6 +8,8 @@
 const request = require("supertest");
 const app = require("../src/app");
 
+// Chapter 4: API Tests
+
 describe("Chapter 4: API Tests", () => {
   it("should return an array of books", async () => {
     const res = await request(app).get("/api/books");
@@ -37,5 +39,37 @@ describe("Chapter 4: API Tests", () => {
     expect(res.statusCode).toBe(404);
     expect(res.body).toHaveProperty("error");
     expect(res.body.error).toMatch(/not found/i);
+  });
+});
+
+// Chapter 5: API Tests
+describe("Chapter 5: API Tests", () => {
+  it("should return a 201-status code when adding a new book", async () => {
+    const res = await request(app).post("/api/books").send({
+      id: 6,
+      title: "A Court of Mist and Fury",
+      author: "Sarah J. Maas",
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toHaveProperty("id", 6);
+    expect(res.body).toHaveProperty("title");
+    expect(res.body).toHaveProperty("author");
+  });
+
+  it("should return a 400-status code when adding a book with missing title", async () => {
+    const res = await request(app)
+      .post("/api/books")
+      .send({ id: 7, author: "Anonymous" });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty("error");
+    expect(res.body.error).toMatch(/title is required/i);
+  });
+
+  it("should return a 204-status code when deleting a book", async () => {
+    // This test assumes the book with ID 1 exists in the default dataset
+    const res = await request(app).delete("/api/books/1");
+    expect(res.statusCode).toBe(204);
   });
 });

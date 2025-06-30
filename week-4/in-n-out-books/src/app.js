@@ -40,4 +40,35 @@ app.get("/api/books/:id", async (req, res) => {
   }
 });
 
+// POST a new book
+app.post("/api/books", async (req, res) => {
+  try {
+    const { id, title, author } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ error: "Title is required." });
+    }
+
+    const newBook = { id, title, author };
+    await books.insertOne(newBook);
+
+    res.status(201).json(newBook);
+  } catch (err) {
+    console.error("POST /api/books error:", err);
+    res.status(500).json({ error: "Could not add the book." });
+  }
+});
+
+// DELETE a book by ID
+app.delete("/api/books/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    await books.deleteOne({ id });
+    res.status(204).send();
+  } catch (err) {
+    console.error("DELETE /api/books/:id error:", err);
+    res.status(500).json({ error: "Could not delete the book." });
+  }
+});
+
 module.exports = app;
