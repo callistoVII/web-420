@@ -1,8 +1,9 @@
 /**
  * Author: Nicole Nielsen
- * Date: 6/22/2025
+ * Date: 6/22/2025 | 07/06/2025
  * File Name: app.js
  * Description: Assignment 4.2
+ * Contains updates for week 6 assignment
  */
 
 const express = require("express");
@@ -68,6 +69,32 @@ app.delete("/api/books/:id", async (req, res) => {
   } catch (err) {
     console.error("DELETE /api/books/:id error:", err);
     res.status(500).json({ error: "Could not delete the book." });
+  }
+});
+
+// PUT update a book by ID
+app.put("/api/books/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Input must be a number" });
+    }
+
+    const { title, author } = req.body;
+    if (!title) {
+      return res.status(400).json({ error: "Bad Request" });
+    }
+
+    const book = await books.findOne({ id }).catch(() => null);
+    if (!book) {
+      return res.status(404).json({ error: "Book not found" });
+    }
+
+    await books.updateOne({ id }, { title, author });
+    res.status(204).send();
+  } catch (err) {
+    console.error("PUT /api/books/:id error:", err);
+    res.status(500).json({ error: "Could not update the book" });
   }
 });
 
