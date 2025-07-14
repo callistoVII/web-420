@@ -117,3 +117,42 @@ describe("Chapter 5: API Tests", () => {
     expect(res.body.error).toBe("Bad Request");
   });
 });
+
+// Week 7: API Tests (Chapter 6)
+describe("Chapter 6: API Tests", () => {
+  it("should log a user in and return 200-status with 'Authentication successful'", async () => {
+    const res = await request(app)
+      .post("/api/login")
+      .send({ email: "harry@hogwarts.edu", password: "potter" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toEqual("Authentication successful");
+  });
+
+  it("should return 401-status code with 'Unauthorized' for incorrect password", async () => {
+    const res = await request(app)
+      .post("/api/login")
+      .send({ email: "harry@hogwarts.edu", password: "wrong_password" });
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body.message).toEqual("Unauthorized");
+  });
+
+  it("should return 400-status code with 'Bad Request' when email is missing", async () => {
+    const res = await request(app)
+      .post("/api/login")
+      .send({ password: "whatever" });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual("Bad Request");
+  });
+
+  it("should return 400-status code with 'Bad Request' when password is missing", async () => {
+    const res = await request(app)
+      .post("/api/login")
+      .send({ email: "hermione@hogwarts.edu" });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual("Bad Request");
+  });
+});

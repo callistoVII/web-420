@@ -7,9 +7,11 @@
  */
 
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const books = require("../database/books");
-const app = express();
+const users = require("../database/users");
 
+const app = express();
 app.use(express.json());
 
 // GET all books
@@ -95,6 +97,32 @@ app.put("/api/books/:id", async (req, res) => {
   } catch (err) {
     console.error("PUT /api/books/:id error:", err);
     res.status(500).json({ error: "Could not update the book" });
+  }
+});
+
+// POST /api/login
+app.post("/api/login", (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Bad Request" });
+    }
+
+    const user = users.data.find((u) => u.email === email);
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const isValidPassword = bcrypt.compareSync(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    res.status(200).json({ message: "Authentication successful" });
+  } catch (err) {
+    console.error("POST /api/login error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
