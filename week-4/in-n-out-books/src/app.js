@@ -126,4 +126,58 @@ app.post("/api/login", (req, res) => {
   }
 });
 
+const Ajv = require("ajv");
+const ajv = new Ajv({ allErrors: true, strict: false });
+
+const securityQuestionsSchema = {
+  type: "object",
+  required: ["newPassword", "securityQuestions"],
+  properties: {
+    newPassword: { type: "string" },
+    securityQuestions: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["answer"],
+        properties: {
+          answer: { type: "string" },
+        },
+        additionalProperties: false,
+      },
+    },
+  },
+  additionalProperties: false,
+};
+
+app.post("/api/users/:email/reset-password", async (req, res) => {
+  try {
+    const validate = ajv.compile(securityQuestionsSchema);
+    if (!validate(req.body)) {
+      return res.status(400).json({ message: "Bad Request" });
+    }
+
+    const { email } = req.params;
+    const { newPassword, securityQuestions } = req.body;
+
+    const user = users.data.find((u) => u.email === email);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const correctAnswers = user.securityQuestions.map((q) => q.answer);
+    const inputAnswers = securityQuestions.map((q) => q.answer);
+
+    const matched = correctAnswers.every((a, i) => a === inputAnswers[i]);
+    if (!matched) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    user.password = bcrypt.hashSync(newPassword, 10);
+    res.status(200).json({ message: "Password reset successful", user });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = app;

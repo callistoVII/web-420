@@ -156,3 +156,57 @@ describe("Chapter 6: API Tests", () => {
     expect(res.body.message).toEqual("Bad Request");
   });
 });
+
+// Week 8: API Tests (Chapter 7)
+describe("Chapter 8: API Tests", () => {
+  const correctAnswers = [
+    { answer: "Hedwig" },
+    { answer: "Quidditch Through the Ages" },
+    { answer: "Evans" },
+  ];
+
+  const mismatchedAnswers = [
+    { answer: "Fluffy" },
+    { answer: "Quidditch Through the Ages" },
+    { answer: "Evans" },
+  ];
+
+  const invalidPayload = {
+    newPassword: "accioNewPassword!",
+    securityQuestions: [{ answer: 42 }, { response: "Hedwig" }],
+  };
+
+  it("should reset password and return 200 with success message", async () => {
+    const res = await request(app)
+      .post("/api/users/harry@hogwarts.edu/reset-password")
+      .send({
+        newPassword: "newSecret123!",
+        securityQuestions: correctAnswers,
+      });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toEqual("Password reset successful");
+    expect(res.body.user).toHaveProperty("email", "harry@hogwarts.edu");
+  });
+
+  it("should return 401 status code with 'Unauthorized' when the security answers are incorrect", async () => {
+    const res = await request(app)
+      .post("/api/users/harry@hogwarts.edu/reset-password")
+      .send({
+        newPassword: "newSecret123!",
+        securityQuestions: mismatchedAnswers,
+      });
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body.message).toEqual("Unauthorized");
+  });
+
+  it("should return 400 status code with 'Bad Request' when payload fails schema validation", async () => {
+    const res = await request(app)
+      .post("/api/users/harry@hogwarts.edu/reset-password")
+      .send(invalidPayload);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual("Bad Request");
+  });
+});
