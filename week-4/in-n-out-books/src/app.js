@@ -149,7 +149,7 @@ const securityQuestionsSchema = {
   additionalProperties: false,
 };
 
-app.post("/api/users/:email/reset-password", async (req, res) => {
+app.post("/api/users/:email/verify-security-question", async (req, res) => {
   try {
     const validate = ajv.compile(securityQuestionsSchema);
     if (!validate(req.body)) {

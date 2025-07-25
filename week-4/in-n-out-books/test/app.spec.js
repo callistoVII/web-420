@@ -166,7 +166,7 @@ describe("Chapter 8: API Tests", () => {
   ];
 
   const mismatchedAnswers = [
-    { answer: "Fluffy" },
+    { answer: "Fluffy" }, // mismatch
     { answer: "Quidditch Through the Ages" },
     { answer: "Evans" },
   ];
@@ -178,9 +178,9 @@ describe("Chapter 8: API Tests", () => {
 
   it("should reset password and return 200 with success message", async () => {
     const res = await request(app)
-      .post("/api/users/harry@hogwarts.edu/reset-password")
+      .post("/api/users/harry@hogwarts.edu/verify-security-question")
       .send({
-        newPassword: "newSecret123!",
+        newPassword: "VoldySucks!3",
         securityQuestions: correctAnswers,
       });
 
@@ -191,9 +191,9 @@ describe("Chapter 8: API Tests", () => {
 
   it("should return 401 status code with 'Unauthorized' when the security answers are incorrect", async () => {
     const res = await request(app)
-      .post("/api/users/harry@hogwarts.edu/reset-password")
+      .post("/api/users/harry@hogwarts.edu/verify-security-question")
       .send({
-        newPassword: "newSecret123!",
+        newPassword: "VoldySucks!3",
         securityQuestions: mismatchedAnswers,
       });
 
@@ -203,7 +203,7 @@ describe("Chapter 8: API Tests", () => {
 
   it("should return 400 status code with 'Bad Request' when payload fails schema validation", async () => {
     const res = await request(app)
-      .post("/api/users/harry@hogwarts.edu/reset-password")
+      .post("/api/users/harry@hogwarts.edu/verify-security-question")
       .send(invalidPayload);
 
     expect(res.statusCode).toBe(400);
